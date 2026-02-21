@@ -1,0 +1,26 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [110.79604431817849, -7.569463698988035]
+            },
+            "properties": {
+                "name" : "C&L Coffee"
+                 }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [110.77169642966817, -7.550348860219934]
+            },
+            "properties": {
+                "name" : "Gemati Coffee"
+                 }
+        } 
+    ]
+}
+

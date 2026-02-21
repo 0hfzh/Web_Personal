@@ -1,0 +1,57 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [ 110.50436129372153 , -7.780161489974448 ]
+            },
+            "properties": {
+                "name" : "Tebing Breksi"
+                 }
+        }, 
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [ 110.49395749240836 , -7.777384702425029  ]
+            },
+            "properties": {
+                "name" : "Candi Banyunibo"
+                 }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [ 110.4957987282943 , -7.782548364660261 ]
+            },
+            "properties": {
+                "name" : "Lapangan Sepak Bola Sambirejo"
+                 }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [ 110.48961016537493 , -7.7872874732190285]
+            },
+            "properties": {
+                "name" : "RUMASAWA Grup Homestay"
+                 }
+        },    
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [ 110.50507272955954 , -7.792149267427816]
+            },
+            "properties": {
+                "name" : "Masjid Nur Khasanah Gunung Cilik"
+                 }
+        }     
+    ]   
+
+}
+

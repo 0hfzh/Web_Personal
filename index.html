@@ -1,0 +1,266 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Visualisasi Data Spasial</title> 
+    <link rel="stylesheet" href="leaflet/leaflet.css"> 
+    <script src="leaflet/leaflet.js"></script> 
+    <script src="leaflet/leaflet.ajax.min.js"></script>
+    <link rel="stylesheet" href="leaflet-compass/leaflet-compass.css" /> 
+    <script src="leaflet-compass/leaflet-compass.js"></script> 
+    <link rel="stylesheet" href="leaflet-minimap/Control.MiniMap.css" /> 
+    <script src="leaflet-minimap/Control.MiniMap.js"></script> 
+        <style> 
+     #mapid { 
+        height: 100vh;  
+        width: 100vw;   
+        margin: 0;      
+        padding: 0;     
+        position: absolute;  
+        top: 0;        
+        left: 0;        
+    } 
+        .info { 
+            padding: 6px 8px; 
+            font: 14px/16px Arial, Helvetica, sans-serif; 
+            background: white; 
+            background: rgba(255,255,255,0.8); 
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            border-radius: 5px; 
+        } 
+        .legend { 
+            line-height: 18px; 
+            color: #555; 
+            background: white; 
+            padding: 6px 8px; 
+            border-radius: 5px; 
+        } 
+        .legend i { 
+            width: 18px; 
+            height: 18px; 
+            float: left; 
+            margin-right: 8px; 
+            opacity: 0.7; 
+        } 
+    </style>  
+</head> 
+<body> 
+         <div id="mapid"></div> 
+    <script> 
+        // Inisialisasi peta 
+        var mymap = L.map('mapid').setView ([ -8.422184, 114.145060], 12); 
+         
+           // Layer variabel opsi basemap 
+        var LightMap = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", { 
+            maxZoom: 18, 
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>' 
+ 
+        }); 
+ 
+        var OSMMap = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { 
+            maxZoom: 18, 
+            attribution: '&copy; OpenStreetMap contributors, &copy; CartoDB' 
+        }); 
+ 
+        var GoogleSatellite = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", { 
+            maxZoom: 17, 
+            attribution: '&copy; OpenStreetMap contributors, &copy; OpenTopoMap' 
+        }); 
+ 
+    // Tambahkan layer "LightMap" sebagai default 
+        LightMap.addTo(mymap); 
+        // Layer peta dasar 
+        L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", { 
+            maxZoom: 18, 
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>' 
+        }).addTo(mymap); 
+
+                // Fungsi untuk menghasilkan warna berdasarkan nama desa 
+        function getColor(name) { 
+            const colors = {
+                'Bokoharjo': '#e41a1c',
+                'Brajan': '#377eb8',
+                'Bugisan': '#4daf4a',
+                'Cucukan': '#984ea3',
+                'Dompyongan': '#ff7f00',
+                'Gayamharjo': '#ffff33',
+                'Geneng': '#a65628',
+                'Jogotirto': '#f781bf',
+                'Joho': '#999999',
+                'Kalitirto': '#66c2a5',
+                'Katekan': '#fc8d62',
+                'Kebondalem Kidul': '#8da0cb',
+                'Kebondalem Lor': '#e78ac3',
+                'Kemudo': '#a6d854',
+                'Kerten': '#ffd92f',
+                'Kokosan': '#e5c494',
+                'Kotesan': '#b3b3b3',
+                'Madurejo': '#1b9e77',
+                'Muruh': '#d95f02',
+                'Mutihan': '#7570b3',
+                'Nangsri': '#e7298a',
+                'Ngoro-oro': '#66a61e',
+                'Pereng': '#e6ab02',
+                'Randusari': '#a6761d',
+                'Sambirejo': '#666666'
+            }; 
+            return colors[name] || 'red'; // warna default jika nama tidak ditemukan 
+        } 
+ 
+        // Fungsi untuk memberikan style pada setiap desa 
+        function style(feature) { 
+            return { 
+                fillColor: getColor(feature.properties.nama_desa), 
+                weight: 2, 
+                opacity: 1, 
+                color: 'black', 
+                dashArray: '3', 
+                fillOpacity: 0.5 
+            }; 
+        } 
+
+                // Fungsi ketika mouse hover pada desa 
+        function highlightFeature(e) { 
+            var layer = e.target; 
+             
+            layer.setStyle({ 
+                weight: 5, 
+                color: '#666', 
+                dashArray: '', 
+                fillOpacity: 0.9 
+            }); 
+ 
+            layer.bringToFront(); 
+            info.update(layer.feature.properties); 
+        } 
+ 
+        // Fungsi ketika mouse keluar dari desa 
+        function resetHighlight(e) { 
+            geojsonLayer.resetStyle(e.target); 
+            info.update(); 
+        } 
+         
+        // Fungsi ketika klik pada desa 
+        function zoomToFeature(e) { 
+            mymap.fitBounds(e.target.getBounds()); 
+        } 
+
+                // Fungsi untuk menambahkan interaksi pada setiap desa 
+        function onEachFeature(feature, layer) { 
+            layer.bindPopup("<b>Desa: </b>" + feature.properties.nama_desa); 
+            layer.on({ 
+                mouseover: highlightFeature, 
+                mouseout: resetHighlight, 
+                click: zoomToFeature 
+            }); 
+        } 
+ 
+        // Tambahkan control info 
+        var info = L.control(); 
+         
+        info.onAdd = function (map) { 
+            this._div = L.DomUtil.create('div', 'info'); 
+            this.update(); 
+            return this._div; 
+        }; 
+         
+        info.update = function (props) { 
+            this._div.innerHTML = '<h4>Informasi Desa</h4>' + 
+            (props ?'<b>Nama: </b>' + props.nama_desa : 'Arahkan kursor ke desa'); 
+        }; 
+ 
+        info.addTo(mymap);
+         // Kontrol basemap 
+    var baseMaps = { 
+            "Light Map": LightMap, 
+            "OSM Map": OSMMap , 
+            "Google Satellite": GoogleSatellite 
+        }; 
+ 
+        L.control.layers(baseMaps).addTo(mymap); 
+
+                // Tambahkan legend 
+        var legend = L.control({position: 'bottomright'}); 
+ 
+        legend.onAdd = function (map) { 
+            var div = L.DomUtil.create('div', 'legend'); 
+            div.innerHTML = '<h4>Keterangan</h4>';
+
+              
+    // Tambahkan entri untuk masjid 
+        div.innerHTML += 
+                '<img src="icon/masjid.png" style="width: 20px; height: 20px; vertical-align: middle;"> Masjid<br>'; 
+                        // Tambahkan entri untuk setiap desa 
+        const desaNames = [ 
+                'Bokoharjo', 'Brajan', 'Bugisan', 'Cucukan', 'Dompyongan', 'Gayamharjo', 'Geneng', 'Jogotirto', 'Joho', 'Kalitirto','Katekan', 'Kebondalem Kidul', 'Kebondalem Lor', 'Kemudo','Kerten', 'Kokosan', 'Kotesan', 'Madurejo', 'Muruh','Mutihan', 'Nangsri', 'Ngoro-oro', 'Pereng', 'Randusari','Sambirejo'
+
+            ]; 
+ 
+            for (let name of desaNames) { 
+            div.innerHTML += 
+                '<i style="background:' + getColor(name) + '"></i>' + name + '<br>'; 
+            } 
+ 
+            return div; 
+        }; 
+ 
+        legend.addTo(mymap);
+
+        // Load data desa dengan error handling 
+        var geojsonLayer = new L.GeoJSON.AJAX("Prambanan.php", { 
+            style: style, 
+            onEachFeature: onEachFeature 
+        }); 
+ 
+        geojsonLayer.on('data:loaded', function() { 
+            mymap.fitBounds(geojsonLayer.getBounds()); 
+        }).addTo(mymap);
+
+        // Definisikan ikon masjid 
+        var masjidIcon = L.icon({ 
+            iconUrl: 'icon/masjid.png', // Path ke ikon masjid 
+            iconSize: [25, 25], // Ukuran ikon (width, height) 
+            iconAnchor: [12, 25], // Titik jangkar (anchor) untuk posisi ikon 
+            popupAnchor: [0, -25] // Posisi popup relatif terhadap ikon 
+        });
+
+        // Load data titik masjid  
+        var masjidLayer = new L.GeoJSON.AJAX("point.php", { 
+            pointToLayer: function (feature, latlng) { 
+                return L.marker(latlng, { icon: masjidIcon }); // Gunakan ikon kustom 
+            }, 
+            onEachFeature: function (feature, layer) { 
+                if (feature.properties && feature.properties.name) { 
+                    layer.bindPopup("<b>Masjid:</b> " + feature.properties.name); 
+                } 
+            } 
+        }); 
+        masjidLayer.on('data:loaded', function () { 
+            mymap.addLayer(masjidLayer); 
+        }); 
+
+        // Menambahkan Kompas 
+        L.control.compass({ 
+            position: 'topleft' // Posisi kompas di kiri atas 
+        }).addTo(mymap); 
+
+       // Tambahkan minimap di kiri bawah 
+        var miniMap = new L.Control.MiniMap(L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", { 
+                maxZoom: 18 
+            }), { 
+                position: 'bottomleft',   
+                width: 150,               
+                height: 100,              
+                zoomLevelOffset: -5,     
+                toggleDisplay: true       
+            }).addTo(mymap);  
+
+            // Menambahkan kontrol skala peta 
+        L.control.scale({ 
+             position: 'bottomleft',  // Posisi skala di pojok kiri bawah 
+             imperial: false          // Menonaktifkan satuan imperial (miles) jika ingin menggunakan metrik (meter, kilometer) 
+        }).addTo(mymap); 
+    </script>
+</body> 
+</html> 
